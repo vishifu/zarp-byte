@@ -147,6 +147,29 @@ public interface RandomInput extends RandomAccess {
             throws IllegalStateException, IndexOutOfBoundsException;
 
     /**
+     * Reads a long at given offset, if where are less than 8 bytes then it is possible to read
+     * and pads high bytes with zeros.
+     *
+     * @param offset logical position within this output
+     * @return long value, maybe pads with zeros
+     */
+    default long readLongIncomplete(@NonNegative long offset)
+            throws IllegalStateException, IndexOutOfBoundsException {
+        int left = (int) (readLimit() - offset);
+        long v = 0;
+        if (left >= 8) {
+            return readLong(offset);
+        }
+        if (left == 4) {
+            return readInt(offset);
+        }
+        for (int i = 0; i < left; i++) {
+            v |= (long) readUByte(offset + i) << (i * 8);
+        }
+        return v;
+    }
+
+    /**
      * Reads a volatile byte value (8-bit) from given offset of this input.
      *
      * @param offset logical position within this input

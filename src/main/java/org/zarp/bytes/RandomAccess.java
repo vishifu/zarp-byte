@@ -132,7 +132,7 @@ public interface RandomAccess extends RefInstance {
      * @return number of bytes that can be safely read with resizing buffer
      */
     default long readAvailable() {
-        return Math.min(size(), readLimit() - readPosition());
+        return Math.min(size(), readLimit()) - readPosition();
     }
 
     /**
@@ -143,7 +143,7 @@ public interface RandomAccess extends RefInstance {
      * @return number of bytes that can be safely written with resizing buffer
      */
     default long writeAvailable() {
-        return Math.min(size(), writeLimit() - writePosition());
+        return Math.min(size(), writeLimit()) - writePosition();
     }
 
     /**
