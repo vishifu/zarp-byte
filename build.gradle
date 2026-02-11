@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+    id 'zplugin-gradle' version '1.0.0'
+}
+
+conf {
+    group = 'org.zarp'
+    artifact = 'zarp-byte'
+    version = '1.0.0-SNAPSHOT'
+}
+
+dependencies {
+    implementation 'org.zarp:zarp-core:1.1.0-local'
+    implementation 'org.zarp:zarp-posix:1.1.0'
+
+    implementation 'org.slf4j:slf4j-api:2.0.17'
+    implementation 'ch.qos.logback:logback-classic:1.5.25'
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+}

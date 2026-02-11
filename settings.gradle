@@ -1,0 +1,6 @@
+pluginManagement.repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+rootProject.name = 'zarp-byte'
