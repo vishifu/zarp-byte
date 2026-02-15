@@ -135,6 +135,22 @@ public interface ZByteStore<U> extends RandomInput, RandomOutput {
     void move(@NonNegative long from, @NonNegative long to, @NonNegative long len)
             throws IllegalStateException, IndexOutOfBoundsException;
 
+    /**
+     * Gets byte at current position without modifying read position.
+     * @return current byte value
+     */
+    default byte peekByte() throws IllegalStateException, IndexOutOfBoundsException {
+        return readByte(readPosition());
+    }
+
+    /**
+     * Gets unsigned byte at current position without modifying read position.
+     * @return current unsigned byte value
+     */
+    default int peekUByte() throws IllegalStateException, IndexOutOfBoundsException {
+        return readUByte(readPosition());
+    }
+
     @Override
     default int addAndGet(long offset, int diff) throws IllegalStateException, IndexOutOfBoundsException {
         for (; ; ) {

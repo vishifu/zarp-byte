@@ -24,8 +24,6 @@ import java.nio.ByteBuffer;
  */
 public interface RandomOutput extends RandomAccess {
 
-    Logger log = LoggerFactory.getLogger(RandomOutput.class);
-
     /**
      * Writes a byte (8-bit) value at given offset of this output.
      *

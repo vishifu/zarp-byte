@@ -2,9 +2,9 @@ package org.zarp.bytes.algo;
 
 import org.zarp.bytes.ZByteStore;
 
-public final class BytesDigest {
+public final class ByteHashDigest {
 
-    private BytesDigest() {
+    private ByteHashDigest() {
     }
 
     /**

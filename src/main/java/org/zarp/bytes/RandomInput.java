@@ -24,8 +24,6 @@ import java.util.Objects;
  */
 public interface RandomInput extends RandomAccess {
 
-    Logger log = LoggerFactory.getLogger(RandomInput.class);
-
     /**
      * Reads a byte value (8-bit) from given offset of this input.
      *

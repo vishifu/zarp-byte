@@ -4,10 +4,20 @@ import org.zarp.bytes.ZByteStore;
 import org.zarp.core.io.ReferenceCountListener;
 import org.zarp.core.io.ReferenceOwnable;
 
-public class OnHeapByteStore implements ZByteStore<byte[]> {
+public class OnHeapByteStore<U> implements ZByteStore<U> {
+
+
+    public long dataOffset() {
+
+    }
+
+    public Object actualUnderlyingObject() {
+
+    }
+
     @Override
-    public byte[] underlyingObject() {
-        return new byte[0];
+    public U underlyingObject() {
+        return null;
     }
 
     @Override
