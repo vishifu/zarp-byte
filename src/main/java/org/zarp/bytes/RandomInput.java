@@ -103,7 +103,7 @@ public interface RandomInput extends RandomAccess {
      * @param offset logical position within this input
      * @return int value
      */
-    short readInt(@NonNegative long offset)
+    int readInt(@NonNegative long offset)
             throws IllegalStateException, IndexOutOfBoundsException;
 
     /**
@@ -323,6 +323,16 @@ public interface RandomInput extends RandomAccess {
 
         return n;
     }
+
+    /**
+     * Reads data into native memory from this input at given offset
+     *
+     * @param offset  logical position within this input
+     * @param address native memory address
+     * @param len     number of bytes to read
+     */
+    void nativeRead(@NonNegative long offset, long address, long len)
+            throws IllegalStateException, IndexOutOfBoundsException;
 
     /**
      * Finds the first occurrence position of the give byte value in this input, starting to find from {@code offset}

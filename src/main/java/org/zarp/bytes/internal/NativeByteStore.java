@@ -26,7 +26,7 @@ public class NativeByteStore implements ZByteStore<Void> {
     }
 
     @Override
-    public short readInt(long offset) throws IllegalStateException, IndexOutOfBoundsException {
+    public int readInt(long offset) throws IllegalStateException, IndexOutOfBoundsException {
         return 0;
     }
 
@@ -66,6 +66,11 @@ public class NativeByteStore implements ZByteStore<Void> {
     }
 
     @Override
+    public void nativeRead(long offset, long address, long len) throws IllegalStateException, IndexOutOfBoundsException {
+
+    }
+
+    @Override
     public void writeByte(long offset, byte i8) throws IllegalStateException, IndexOutOfBoundsException {
 
     }
@@ -76,7 +81,7 @@ public class NativeByteStore implements ZByteStore<Void> {
     }
 
     @Override
-    public void writeInt(long offset, int i32) {
+    public void writeInt(long offset, int i32) throws IllegalStateException, IndexOutOfBoundsException {
 
     }
 

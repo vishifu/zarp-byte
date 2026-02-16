@@ -131,7 +131,8 @@ public interface RandomOutput extends RandomAccess {
      * @param offset logical position within this output
      * @param i32    int value
      */
-    void writeInt(@NonNegative long offset, int i32);
+    void writeInt(@NonNegative long offset, int i32)
+            throws IllegalStateException, IndexOutOfBoundsException;
 
     /**
      * Writes an unsigned int (32-bit) value at given offset of this output.
@@ -280,7 +281,7 @@ public interface RandomOutput extends RandomAccess {
      */
     default void write(@NonNegative long offset, byte[] src, int srcBegin, int len)
             throws IllegalStateException, IndexOutOfBoundsException {
-        if ((srcBegin + len) >= src.length) {
+        if ((srcBegin + len) > src.length) {
             throw newIllegalBound(srcBegin, len, src.length);
         }
 
@@ -303,13 +304,7 @@ public interface RandomOutput extends RandomAccess {
      */
     default void write(@NonNegative long offset, ByteBuffer src) {
         int len = src.remaining();
-        int i = 0;
-        for (; i < len - 7; i += 8) {
-            memory().writeLong(offset + i, src.getLong());
-        }
-        for (; i < len; i++) {
-            memory().writeByte(offset + i, src.get());
-        }
+        write(offset, src, src.position(), len);
     }
 
     /**
@@ -321,7 +316,7 @@ public interface RandomOutput extends RandomAccess {
      * @param len      number of bytes to write
      */
     default void write(@NonNegative long offset, ByteBuffer src, int srcBegin, int len) {
-        if ((srcBegin + len) >= src.capacity()) {
+        if ((srcBegin + len) > src.capacity()) {
             throw newIllegalBound(srcBegin, len, src.capacity());
         }
 
