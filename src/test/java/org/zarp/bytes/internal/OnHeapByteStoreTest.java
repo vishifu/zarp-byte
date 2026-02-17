@@ -111,5 +111,4 @@ class OnHeapByteStoreTest {
         assertArrayEquals(arr, ret);
     }
 
-
 }
