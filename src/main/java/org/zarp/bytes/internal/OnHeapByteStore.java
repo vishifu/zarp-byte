@@ -25,10 +25,13 @@ public class OnHeapByteStore<U> extends AbstractByteStore<U> implements ZByteSto
 
     /* actual byte array backing of this store when wrapping heap memory */
     private Object realUnderlyingObject;
+
     /* original object passed to constructor, array or ByteBuffer */
     private final U underlyingObject;
+
     /* unsafe offset of the first byte of this store */
     private final int dataOffset;
+
     /* usable capacity of this store */
     private final long capacity;
 
@@ -186,11 +189,12 @@ public class OnHeapByteStore<U> extends AbstractByteStore<U> implements ZByteSto
     }
 
     @Override
-    public int read(long offset, byte[] dst, int dstBegin, int len) throws IllegalStateException, IndexOutOfBoundsException {
+    public int read(long offset, byte[] dst, int dstBegin, int len)
+            throws IllegalStateException, IndexOutOfBoundsException {
         Objects.requireNonNull(dst);
-        Ints.assertNonNegative(dstBegin);
-        Ints.assertNonNegative(len);
-        Longs.assertNonNegative(offset);
+        Ints.requireNonNegative(dstBegin);
+        Ints.requireNonNegative(len);
+        Longs.requireNonNegative(offset);
         if ((dstBegin + len) > dst.length) {
             throw new IllegalArgumentException(format("require range [%d, %d+%d) is out of dst range", dstBegin, dstBegin, len));
         }
@@ -202,9 +206,9 @@ public class OnHeapByteStore<U> extends AbstractByteStore<U> implements ZByteSto
     @Override
     public int read(long offset, ByteBuffer dst, int dstBegin, int len) {
         Objects.requireNonNull(dst);
-        Ints.assertNonNegative(dstBegin);
-        Ints.assertNonNegative(len);
-        Longs.assertNonNegative(offset);
+        Ints.requireNonNegative(dstBegin);
+        Ints.requireNonNegative(len);
+        Longs.requireNonNegative(offset);
         if ((dstBegin + len) > dst.capacity()) {
             throw new IllegalArgumentException(format("require range [%d, %d+%d) is out of dst capacity", dstBegin, dstBegin, len));
         }
@@ -302,11 +306,12 @@ public class OnHeapByteStore<U> extends AbstractByteStore<U> implements ZByteSto
     }
 
     @Override
-    public void write(long offset, byte[] src, int srcBegin, int len) throws IllegalStateException, IndexOutOfBoundsException {
+    public void write(long offset, byte[] src, int srcBegin, int len)
+            throws IllegalStateException, IndexOutOfBoundsException {
         Objects.requireNonNull(src);
-        Ints.assertNonNegative(srcBegin);
-        Ints.assertNonNegative(len);
-        Longs.assertNonNegative(offset);
+        Ints.requireNonNegative(srcBegin);
+        Ints.requireNonNegative(len);
+        Longs.requireNonNegative(offset);
         if ((srcBegin + len) > src.length) {
             throw new IllegalArgumentException(format("require range [%d, %d+%d) is out of src length", srcBegin, srcBegin, len));
         }
@@ -314,11 +319,12 @@ public class OnHeapByteStore<U> extends AbstractByteStore<U> implements ZByteSto
     }
 
     @Override
-    public void write(long offset, ByteBuffer src, int srcBegin, int len) {
+    public void write(long offset, ByteBuffer src, int srcBegin, int len)
+            throws IllegalStateException, IndexOutOfBoundsException {
         Objects.requireNonNull(src);
-        Ints.assertNonNegative(srcBegin);
-        Ints.assertNonNegative(len);
-        Longs.assertNonNegative(offset);
+        Ints.requireNonNegative(srcBegin);
+        Ints.requireNonNegative(len);
+        Longs.requireNonNegative(offset);
         assert this.realUnderlyingObject != null || this.dataOffset >= (Jvm.is64Bit() ? 12 : 8);
         if ((srcBegin + len) > src.capacity()) {
             throw new IllegalArgumentException(format("require range [%d, %d+%d) is out of src capacity", srcBegin, srcBegin, len));

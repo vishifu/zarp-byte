@@ -315,7 +315,8 @@ public interface RandomOutput extends RandomAccess {
      * @param srcBegin position starting to copy data from source
      * @param len      number of bytes to write
      */
-    default void write(@NonNegative long offset, ByteBuffer src, int srcBegin, int len) {
+    default void write(@NonNegative long offset, ByteBuffer src, int srcBegin, int len)
+            throws IllegalStateException, IndexOutOfBoundsException {
         if ((srcBegin + len) > src.capacity()) {
             throw newIllegalBound(srcBegin, len, src.capacity());
         }

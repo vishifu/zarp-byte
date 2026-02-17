@@ -233,7 +233,8 @@ public interface RandomInput extends RandomAccess {
      * @param dst    destination byte array
      * @return actual number of bytes that was read
      */
-    default int read(@NonNegative long offset, byte[] dst) {
+    default int read(@NonNegative long offset, byte[] dst)
+            throws IllegalStateException, IndexOutOfBoundsException{
         return read(offset, dst, 0, dst.length);
     }
 
@@ -246,7 +247,8 @@ public interface RandomInput extends RandomAccess {
      * @param dstBegin destination start position
      * @return actual number of bytes that was read
      */
-    default int read(@NonNegative long offset, byte[] dst, int dstBegin) {
+    default int read(@NonNegative long offset, byte[] dst, int dstBegin)
+            throws IllegalStateException, IndexOutOfBoundsException{
         return read(offset, dst, dstBegin, (dst.length - dstBegin));
     }
 
@@ -262,7 +264,7 @@ public interface RandomInput extends RandomAccess {
      */
     default int read(@NonNegative long offset, byte[] dst, int dstBegin, int len)
             throws IllegalStateException, IndexOutOfBoundsException {
-        if ((dstBegin + len) >= dst.length) {
+        if ((dstBegin + len) > dst.length) {
             throw newIllegalBound(dstBegin, len, dst.length);
         }
         int n = Math.min(len, (int) (readLimit() - offset));
@@ -289,7 +291,8 @@ public interface RandomInput extends RandomAccess {
      * @param dst    destination ByteBuffer
      * @return actual number of bytes that was can be read
      */
-    default int read(@NonNegative long offset, ByteBuffer dst) {
+    default int read(@NonNegative long offset, ByteBuffer dst)
+            throws IllegalStateException, IndexOutOfBoundsException {
         return read(offset, dst, dst.position(), dst.remaining());
     }
 
@@ -302,9 +305,10 @@ public interface RandomInput extends RandomAccess {
      * @param len      number of bytes to read
      * @return actual number of bytes that was can be read
      */
-    default int read(@NonNegative long offset, ByteBuffer dst, int dstBegin, int len) {
+    default int read(@NonNegative long offset, ByteBuffer dst, int dstBegin, int len)
+    throws IllegalStateException, IndexOutOfBoundsException {
         Objects.requireNonNull(dst, "destination is null");
-        if ((dstBegin + len) >= dst.capacity()) {
+        if ((dstBegin + len) > dst.capacity()) {
             throw newIllegalBound(dstBegin, len, dst.capacity());
         }
 
