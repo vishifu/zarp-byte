@@ -5,6 +5,8 @@ import org.zarp.core.api.ZPlatform;
 import org.zarp.core.io.ReferenceCountListener;
 import org.zarp.core.io.ReferenceOwnable;
 
+import java.nio.ByteBuffer;
+
 /**
  * An immutable dummy byte-store with zero capacity used as a placeholder.
  */
@@ -96,6 +98,18 @@ public final class NoByteStore implements ZByteStore<Void> {
     }
 
     @Override
+    public int read(long offset, byte[] dst, int dstBegin, int len)
+            throws IllegalStateException, IndexOutOfBoundsException {
+        throw UNSUPPORTED;
+    }
+
+    @Override
+    public int read(long offset, ByteBuffer dst, int dstBegin, int len)
+            throws IllegalStateException, IndexOutOfBoundsException {
+        throw UNSUPPORTED;
+    }
+
+    @Override
     public void nativeRead(long offset, long address, long len)
             throws IllegalStateException, IndexOutOfBoundsException {
         throw UNSUPPORTED;
@@ -159,6 +173,16 @@ public final class NoByteStore implements ZByteStore<Void> {
     public void writeLongVolatile(long offset, long i64)
             throws IllegalStateException, IndexOutOfBoundsException {
         throw UNSUPPORTED;
+    }
+
+    @Override
+    public void write(long offset, byte[] src, int srcBegin, int len) throws IllegalStateException, IndexOutOfBoundsException {
+
+    }
+
+    @Override
+    public void write(long offset, ByteBuffer src, int srcBegin, int len) throws IllegalStateException, IndexOutOfBoundsException {
+
     }
 
     @Override

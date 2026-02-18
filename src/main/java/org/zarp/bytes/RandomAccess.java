@@ -184,6 +184,25 @@ public interface RandomAccess extends RefInstance {
     }
 
     /**
+     * Tests if this output can be written directly from native memory.
+     *
+     * @return true if directly read from native memory, false otherwise
+     */
+    default boolean canWriteDirect() {
+        return canWriteDirect(0L);
+    }
+
+    /**
+     * Tests if this output can be written directly from native memory.
+     *
+     * @param n required number of bytes to read
+     * @return true if directly read from native memory, false otherwise
+     */
+    default boolean canWriteDirect(@NonNegative long n) {
+        return isNative() && writeAvailable() >= n;
+    }
+
+    /**
      * Gets the byte-order of this buffer.
      * By default, the returned value is native-order (according to {@link ByteOrder#nativeOrder()}.
      *

@@ -106,7 +106,7 @@ public interface RandomOutput extends RandomAccess {
     default void writeInt24(@NonNegative long offset, int i24)
             throws IllegalStateException, IndexOutOfBoundsException {
         if (IS_LITTLE_ENDIAN) {
-            writeShort(offset, i24);
+            writeShort(offset, (short) i24);
             writeByte(offset + 2, (byte) (i24 >> 16));
         } else {
             writeShort(offset, i24 >> 8);
@@ -279,22 +279,8 @@ public interface RandomOutput extends RandomAccess {
      * @param srcBegin position starting to copy data from source
      * @param len      number of bytes to write
      */
-    default void write(@NonNegative long offset, byte[] src, int srcBegin, int len)
-            throws IllegalStateException, IndexOutOfBoundsException {
-        if ((srcBegin + len) > src.length) {
-            throw newIllegalBound(srcBegin, len, src.length);
-        }
-
-        int i = 0;
-
-        for (; i < len - 7; i++) {
-            long v = ByteCommon.getLong(src, srcBegin + i);
-            memory().writeLong(offset + i, v);
-        }
-        for (; i < len; i++) {
-            memory().writeByte(offset + i, src[srcBegin + i]);
-        }
-    }
+    void write(@NonNegative long offset, byte[] src, int srcBegin, int len)
+            throws IllegalStateException, IndexOutOfBoundsException;
 
     /**
      * Writes a source of ByteBuffer into this output.
@@ -315,20 +301,9 @@ public interface RandomOutput extends RandomAccess {
      * @param srcBegin position starting to copy data from source
      * @param len      number of bytes to write
      */
-    default void write(@NonNegative long offset, ByteBuffer src, int srcBegin, int len)
-            throws IllegalStateException, IndexOutOfBoundsException {
-        if ((srcBegin + len) > src.capacity()) {
-            throw newIllegalBound(srcBegin, len, src.capacity());
-        }
+    void write(@NonNegative long offset, ByteBuffer src, int srcBegin, int len)
+            throws IllegalStateException, IndexOutOfBoundsException;
 
-        int i = 0;
-        for (; i < len - 7; i += 8) {
-            memory().writeLong(offset + i, src.getLong(srcBegin + i));
-        }
-        for (; i < len; i++) {
-            memory().writeByte(offset + i, src.get(srcBegin + i));
-        }
-    }
 
     /**
      * Performs a compare-and-swap (CAS) operation for 32-bit value at given offset of this output.

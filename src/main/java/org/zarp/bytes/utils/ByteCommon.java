@@ -264,4 +264,8 @@ public final class ByteCommon {
         }
     }
 
+    public static long padOffset(long from) {
+        return (-from) & 0x3f;
+    }
+
 }

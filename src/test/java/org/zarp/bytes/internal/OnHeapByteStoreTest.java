@@ -42,7 +42,6 @@ class OnHeapByteStoreTest {
         byte b = (byte) 'b';
         store.writeByte(1, b);
         assertEquals(b, store.readByte(1));
-
         int ub = 255;
         store.writeUByte(1, ub);
         assertEquals(ub, store.readUByte(1));
@@ -50,9 +49,19 @@ class OnHeapByteStoreTest {
         short i16 = 16553;
         store.writeShort(2, i16);
         assertEquals(i16, store.readShort(2));
+        store.writeUShort(2, i16);
+        assertEquals(i16, store.readUShort(2));
+
+        int i24 = 1 << 20;
+        store.writeInt24(2,  i24);
+        assertEquals(i24, store.readInt24(2));
+        store.writeUInt24(2, i24);
+        assertEquals(i24, store.readInt24(2));
 
         int i32 = 6553533;
         store.writeInt(4, i32);
+        assertEquals(i32, store.readInt(4));
+        store.writeUInt(4, i32);
         assertEquals(i32, store.readInt(4));
 
         long i64 = 1L << 45;
