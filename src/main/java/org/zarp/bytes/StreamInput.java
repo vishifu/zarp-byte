@@ -1,13 +1,10 @@
 package org.zarp.bytes;
 
+import org.zarp.bytes.exception.DecoratedBufferOverflowException;
 import org.zarp.bytes.utils.ByteCommon;
 import org.zarp.core.annotations.NonNegative;
-import org.zarp.core.conditions.Ints;
 
 import java.nio.ByteBuffer;
-import java.util.Objects;
-
-import static java.lang.String.format;
 
 /**
  * Represents a sequential base reading stream or buffer on binary data.
@@ -37,19 +34,19 @@ public interface StreamInput extends StreamCommon {
      *
      * @param pos new position
      */
-    void readPosition(@NonNegative long pos) throws IndexOutOfBoundsException;
+    void readPosition(@NonNegative long pos) throws DecoratedBufferOverflowException;
 
     /**
      * Sets the limit of this input.
      *
      * @param limit new limit
      */
-    void readLimit(@NonNegative long limit) throws IndexOutOfBoundsException;
+    void readLimit(@NonNegative long limit) throws DecoratedBufferOverflowException;
 
     /**
      * Sets the read limit to capacity of this input.
      */
-    default void readLimitToCapacity() throws IndexOutOfBoundsException {
+    default void readLimitToCapacity() throws DecoratedBufferOverflowException {
         readLimit(capacity());
     }
 
@@ -60,7 +57,7 @@ public interface StreamInput extends StreamCommon {
      * @param pos new position
      * @param n   the remaining size, which is used to set limit
      */
-    default void readPositionRemaining(@NonNegative long pos, long n) throws IndexOutOfBoundsException {
+    default void readPositionRemaining(@NonNegative long pos, long n) throws DecoratedBufferOverflowException {
         readLimit(pos + n);
         readPosition(pos);
     }
@@ -72,7 +69,7 @@ public interface StreamInput extends StreamCommon {
      * @param pos new position
      */
     default void readPositionUnlimit(long pos)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         readLimitToCapacity();
         readPosition(pos);
     }

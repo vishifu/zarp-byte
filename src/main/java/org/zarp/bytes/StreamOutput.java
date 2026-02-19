@@ -1,14 +1,12 @@
 package org.zarp.bytes;
 
+import org.zarp.bytes.exception.DecoratedBufferOverflowException;
 import org.zarp.bytes.utils.ByteCommon;
 import org.zarp.core.annotations.NonNegative;
-import org.zarp.core.conditions.Ints;
 import org.zarp.core.utils.MathUtil;
 
 import java.nio.ByteBuffer;
 import java.util.Objects;
-
-import static java.lang.String.format;
 
 /**
  * Represents a sequential base writing stream or buffer on binary data into other data structures.
@@ -26,7 +24,7 @@ public interface StreamOutput extends StreamCommon {
      *
      * @param requested requested size
      */
-    void ensureCapacity(long requested) throws IllegalStateException, IndexOutOfBoundsException;
+    void ensureCapacity(long requested) throws IllegalStateException, DecoratedBufferOverflowException;
 
     @Override
     default boolean canWriteDirect(long n) {
@@ -38,14 +36,14 @@ public interface StreamOutput extends StreamCommon {
      *
      * @param pos newly position
      */
-    void writePosition(@NonNegative long pos) throws IndexOutOfBoundsException;
+    void writePosition(@NonNegative long pos) throws DecoratedBufferOverflowException;
 
     /**
      * Sets the limit index of write position can be of this output.
      *
      * @param limit newly limit
      */
-    void writeLimit(@NonNegative long limit) throws IndexOutOfBoundsException;
+    void writeLimit(@NonNegative long limit) throws DecoratedBufferOverflowException;
 
     /**
      * Advances the write position by {@code n} bytes, the eventual result of {@link #writePosition()}

@@ -1,8 +1,6 @@
 package org.zarp.bytes;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.zarp.bytes.utils.ByteCommon;
+import org.zarp.bytes.exception.DecoratedBufferOverflowException;
 import org.zarp.core.annotations.NonNegative;
 import org.zarp.core.utils.MathUtil;
 
@@ -16,7 +14,7 @@ import java.nio.ByteBuffer;
  * Supports reading of primitive data type like {@code boolean, byte, int, long, etc}.
  * This also have capability of direct reading memory or reading after loading memory barrier.
  * <p>
- * Methods of this can throw exception to {@link IndexOutOfBoundsException} for invalid offset or
+ * Methods of this can throw exception to {@link DecoratedBufferOverflowException} for invalid offset or
  * {@link IllegalStateException} for accessing closed resource.
  * <p>
  * Note: implementation of this usually not care about thread-safe, if multiple threads interact
@@ -31,7 +29,7 @@ public interface RandomOutput extends RandomAccess {
      * @param i8     byte value
      */
     void writeByte(@NonNegative long offset, byte i8)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Writes an integer as byte (8-bit) value at given offset of this output.
@@ -40,7 +38,7 @@ public interface RandomOutput extends RandomAccess {
      * @param i8     byte value represented as int
      */
     default void writeByte(@NonNegative long offset, int i8)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         writeByte(offset, MathUtil.toInt8(i8));
     }
 
@@ -51,7 +49,7 @@ public interface RandomOutput extends RandomAccess {
      * @param u8     unsigned byte value
      */
     default void writeUByte(@NonNegative long offset, int u8)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         writeByte(offset, (byte) MathUtil.toUint8(u8));
     }
 
@@ -62,7 +60,7 @@ public interface RandomOutput extends RandomAccess {
      * @param b      bool value
      */
     default void writeByte(@NonNegative long offset, boolean b)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         writeByte(offset, b ? 1 : 0);
     }
 
@@ -73,7 +71,7 @@ public interface RandomOutput extends RandomAccess {
      * @param i16    short value
      */
     void writeShort(@NonNegative long offset, short i16)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Writes an integer as short (16-bit) value at given offset of this output.
@@ -82,7 +80,7 @@ public interface RandomOutput extends RandomAccess {
      * @param i16    short value represented as int
      */
     default void writeShort(@NonNegative long offset, int i16)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         writeShort(offset, (short) MathUtil.toInt16(i16));
     }
 
@@ -93,7 +91,7 @@ public interface RandomOutput extends RandomAccess {
      * @param u16    unsigned short value
      */
     default void writeUShort(@NonNegative long offset, int u16)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         writeShort(offset, (short) MathUtil.toUint16(u16));
     }
 
@@ -104,7 +102,7 @@ public interface RandomOutput extends RandomAccess {
      * @param i24    24-bit value
      */
     default void writeInt24(@NonNegative long offset, int i24)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         if (IS_LITTLE_ENDIAN) {
             writeShort(offset, (short) i24);
             writeByte(offset + 2, (byte) (i24 >> 16));
@@ -121,7 +119,7 @@ public interface RandomOutput extends RandomAccess {
      * @param u24    unsigned 24-bit value
      */
     default void writeUInt24(@NonNegative long offset, int u24)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         writeInt24(offset, MathUtil.toUint24(u24));
     }
 
@@ -132,7 +130,7 @@ public interface RandomOutput extends RandomAccess {
      * @param i32    int value
      */
     void writeInt(@NonNegative long offset, int i32)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Writes an unsigned int (32-bit) value at given offset of this output.
@@ -141,7 +139,7 @@ public interface RandomOutput extends RandomAccess {
      * @param u32    unsigned int value
      */
     default void writeUInt(@NonNegative long offset, long u32)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         writeInt(offset, (int) MathUtil.toUint32(u32));
     }
 
@@ -152,7 +150,7 @@ public interface RandomOutput extends RandomAccess {
      * @param i64    long value
      */
     void writeLong(@NonNegative long offset, long i64)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Writes a float (32-bit) value at given offset of this output.
@@ -161,7 +159,7 @@ public interface RandomOutput extends RandomAccess {
      * @param f32    32-bit floating value
      */
     void writeFloat(@NonNegative long offset, float f32)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Writes a double (64-bit) value at given offset of this output.
@@ -170,7 +168,7 @@ public interface RandomOutput extends RandomAccess {
      * @param f64    64-bit floating value
      */
     void writeDouble(@NonNegative long offset, double f64)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Writes a 32-bit integer value at give offset with a memory barrier to ensure of stores.
@@ -180,7 +178,7 @@ public interface RandomOutput extends RandomAccess {
      * @param i32    integer value
      */
     void writeIntOrdered(@NonNegative long offset, int i32)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Writes a 64-bit integer value at give offset with a memory barrier to ensure of stores.
@@ -190,7 +188,7 @@ public interface RandomOutput extends RandomAccess {
      * @param i64    long value
      */
     void writeLongOrdered(@NonNegative long offset, long i64)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Writes a 32-bit floating value at give offset with a memory barrier to ensure of stores.
@@ -200,7 +198,7 @@ public interface RandomOutput extends RandomAccess {
      * @param f32    32-bit floating value
      */
     default void writeFloatOrdered(@NonNegative long offset, float f32)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         writeInt(offset, Float.floatToIntBits(f32));
     }
 
@@ -212,7 +210,7 @@ public interface RandomOutput extends RandomAccess {
      * @param f64    64-bit floating value
      */
     default void writeDoubleOrdered(@NonNegative long offset, double f64)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         writeLong(offset, Double.doubleToLongBits(f64));
     }
 
@@ -224,7 +222,7 @@ public interface RandomOutput extends RandomAccess {
      * @param i32    integer value
      */
     void writeIntVolatile(@NonNegative long offset, int i32)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Writes a volatile 64-bit integer value at specified offset of this source.
@@ -234,7 +232,7 @@ public interface RandomOutput extends RandomAccess {
      * @param i64    long value
      */
     void writeLongVolatile(@NonNegative long offset, long i64)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Writes a volatile 32-bit float value at specified offset of this source.
@@ -244,7 +242,7 @@ public interface RandomOutput extends RandomAccess {
      * @param f32    32-bit floating value
      */
     default void writeFloatVolatile(@NonNegative long offset, float f32)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         writeInt(offset, Float.floatToIntBits(f32));
     }
 
@@ -256,7 +254,7 @@ public interface RandomOutput extends RandomAccess {
      * @param f64    64-bit floating value
      */
     default void writeDoubleVolatile(@NonNegative long offset, double f64)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         writeLong(offset, Double.doubleToLongBits(f64));
     }
 
@@ -267,7 +265,7 @@ public interface RandomOutput extends RandomAccess {
      * @param src    source byte array
      */
     default void write(@NonNegative long offset, byte[] src)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         write(offset, src, 0, src.length);
     }
 
@@ -280,7 +278,7 @@ public interface RandomOutput extends RandomAccess {
      * @param len      number of bytes to write
      */
     void write(@NonNegative long offset, byte[] src, int srcBegin, int len)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Writes a source of ByteBuffer into this output.
@@ -302,7 +300,7 @@ public interface RandomOutput extends RandomAccess {
      * @param len      number of bytes to write
      */
     void write(@NonNegative long offset, ByteBuffer src, int srcBegin, int len)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
 
     /**
@@ -314,7 +312,7 @@ public interface RandomOutput extends RandomAccess {
      * @return true if newly value is set  at given offset, false otherwise
      */
     boolean compareAndSwap(@NonNegative long offset, int expected, int value)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Performs a compare-and-swap (CAS) operation for 64-bit value at given offset of this output.
@@ -325,7 +323,7 @@ public interface RandomOutput extends RandomAccess {
      * @return true if newly value is set  at given offset, false otherwise
      */
     boolean compareAndSwap(@NonNegative long offset, long expected, long value)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Performs a compare-and-swap (CAS) operation for 32-bit floating value at given offset of this output.
@@ -336,7 +334,7 @@ public interface RandomOutput extends RandomAccess {
      * @return true if newly value is set  at given offset, false otherwise
      */
     default boolean compareAndSwap(@NonNegative long offset, float expected, float value)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         return compareAndSwap(offset, Float.floatToIntBits(expected), Float.floatToIntBits(value));
     }
 
@@ -349,7 +347,7 @@ public interface RandomOutput extends RandomAccess {
      * @return true if newly value is set  at given offset, false otherwise
      */
     default boolean compareAndSwap(@NonNegative long offset, double expected, double value)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         return compareAndSwap(offset, Double.doubleToLongBits(expected), Double.doubleToLongBits(value));
     }
 
@@ -361,7 +359,7 @@ public interface RandomOutput extends RandomAccess {
      * @param value    newly value to set
      */
     void testAndSet(@NonNegative long offset, int expected, int value)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Tests if current value at given offset equals to expected, if so, set the new value for it.
@@ -371,7 +369,7 @@ public interface RandomOutput extends RandomAccess {
      * @param value    newly value to set
      */
     void testAndSet(@NonNegative long offset, long expected, long value)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Atomically adds a 32-bit value to current value at given offset and get the eventual result back.
@@ -381,7 +379,7 @@ public interface RandomOutput extends RandomAccess {
      * @return sum of original value with adding value
      */
     int addAndGet(@NonNegative long offset, int diff)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Atomically adds a 64-bit value to current value at given offset and get the eventual result back.
@@ -391,7 +389,7 @@ public interface RandomOutput extends RandomAccess {
      * @return sum of original value with adding value
      */
     long addAndGet(@NonNegative long offset, long diff)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Atomically adds a 32-bit floating value to current value at given offset and get the eventual result back.
@@ -401,7 +399,7 @@ public interface RandomOutput extends RandomAccess {
      * @return sum of original value with adding value
      */
     float addAndGet(@NonNegative long offset, float diff)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Atomically adds a 64-bit floating value to current value at given offset and get the eventual result back.
@@ -411,7 +409,7 @@ public interface RandomOutput extends RandomAccess {
      * @return sum of original value with adding value
      */
     double addAndGet(@NonNegative long offset, double diff)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Fills the specified range [begin, end) of this output with zeros.
@@ -420,7 +418,7 @@ public interface RandomOutput extends RandomAccess {
      * @param end   offset end the range
      */
     void zeroOut(@NonNegative long begin, @NonNegative long end)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Writes data directly from native memory address into this output at given offset.
@@ -430,6 +428,6 @@ public interface RandomOutput extends RandomAccess {
      * @param len     number of bytes to write
      */
     void nativeWrite(@NonNegative long address, @NonNegative long offset, @NonNegative long len)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException;
 
 }

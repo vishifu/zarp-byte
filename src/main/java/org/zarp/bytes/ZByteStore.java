@@ -2,6 +2,7 @@ package org.zarp.bytes;
 
 import org.zarp.bytes.algo.OptimisedByteStoreHash;
 import org.zarp.bytes.algo.VanillaByteStoreHash;
+import org.zarp.bytes.exception.DecoratedBufferOverflowException;
 import org.zarp.bytes.internal.NativeByteStore;
 import org.zarp.core.annotations.NonNegative;
 
@@ -15,7 +16,7 @@ import java.util.Objects;
  *
  * @param <U> underlying data type
  */
-public interface ZByteStore<U> extends RandomInput, RandomOutput {
+public interface ZByteStore<U> extends RandomInput, RandomOutput, AddressTranslate {
 
     /**
      * @return the backed object for this data structure, or null if not present
@@ -88,7 +89,7 @@ public interface ZByteStore<U> extends RandomInput, RandomOutput {
      * @param store destination store
      * @return actual number of bytes were transferred
      */
-    default long copyTo(ZByteStore<?> store) throws IllegalStateException, IndexOutOfBoundsException {
+    default long copyTo(ZByteStore<?> store) throws IllegalStateException, DecoratedBufferOverflowException {
         Objects.requireNonNull(store, "destination store is null");
         ensureNotReleased();
         store.ensureNotReleased();
@@ -114,7 +115,7 @@ public interface ZByteStore<U> extends RandomInput, RandomOutput {
      *
      * @param os destination output stream
      */
-    default void copyTo(OutputStream os) throws IllegalStateException, IndexOutOfBoundsException, IOException {
+    default void copyTo(OutputStream os) throws IllegalStateException, DecoratedBufferOverflowException, IOException {
         Objects.requireNonNull(os, "output stream is null");
         ensureNotReleased();
         final byte[] buffer = new byte[512];
@@ -133,13 +134,13 @@ public interface ZByteStore<U> extends RandomInput, RandomOutput {
      * @param len  number of bytes to move
      */
     void move(@NonNegative long from, @NonNegative long to, @NonNegative long len)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Gets byte at current position without modifying read position.
      * @return current byte value
      */
-    default byte peekByte() throws IllegalStateException, IndexOutOfBoundsException {
+    default byte peekByte() throws IllegalStateException, DecoratedBufferOverflowException {
         return readByte(readPosition());
     }
 
@@ -147,12 +148,12 @@ public interface ZByteStore<U> extends RandomInput, RandomOutput {
      * Gets unsigned byte at current position without modifying read position.
      * @return current unsigned byte value
      */
-    default int peekUByte() throws IllegalStateException, IndexOutOfBoundsException {
+    default int peekUByte() throws IllegalStateException, DecoratedBufferOverflowException {
         return readUByte(readPosition());
     }
 
     @Override
-    default int addAndGet(long offset, int diff) throws IllegalStateException, IndexOutOfBoundsException {
+    default int addAndGet(long offset, int diff) throws IllegalStateException, DecoratedBufferOverflowException {
         for (; ; ) {
             int v = readIntVolatile(offset);
             int nv = v + diff;
@@ -163,7 +164,7 @@ public interface ZByteStore<U> extends RandomInput, RandomOutput {
     }
 
     @Override
-    default long addAndGet(long offset, long diff) throws IllegalStateException, IndexOutOfBoundsException {
+    default long addAndGet(long offset, long diff) throws IllegalStateException, DecoratedBufferOverflowException {
         for (; ; ) {
             long v = readLongVolatile(offset);
             long nv = v + diff;
@@ -174,7 +175,7 @@ public interface ZByteStore<U> extends RandomInput, RandomOutput {
     }
 
     @Override
-    default float addAndGet(long offset, float diff) throws IllegalStateException, IndexOutOfBoundsException {
+    default float addAndGet(long offset, float diff) throws IllegalStateException, DecoratedBufferOverflowException {
         for (; ; ) {
             float v = readFloatVolatile(offset);
             float nv = v + diff;
@@ -185,7 +186,7 @@ public interface ZByteStore<U> extends RandomInput, RandomOutput {
     }
 
     @Override
-    default double addAndGet(long offset, double diff) throws IllegalStateException, IndexOutOfBoundsException {
+    default double addAndGet(long offset, double diff) throws IllegalStateException, DecoratedBufferOverflowException {
         for (; ; ) {
             double v = readDoubleVolatile(offset);
             double nv = v + diff;
@@ -196,7 +197,7 @@ public interface ZByteStore<U> extends RandomInput, RandomOutput {
     }
 
     @Override
-    default void zeroOut(long begin, long end) throws IllegalStateException, IndexOutOfBoundsException {
+    default void zeroOut(long begin, long end) throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         if (end <= begin) return;
         begin = Math.max(begin, start());

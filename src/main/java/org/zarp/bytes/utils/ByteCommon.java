@@ -179,7 +179,7 @@ public final class ByteCommon {
     }
 
     private static boolean contentEqualLoop(ZByteStore<?> a, ZByteStore<?> b, long alen, long blen)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         long apos = a.readPosition();
         long bpos = b.readPosition();
         long i = 0;

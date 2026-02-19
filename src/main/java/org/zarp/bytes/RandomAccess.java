@@ -1,5 +1,6 @@
 package org.zarp.bytes;
 
+import org.zarp.bytes.exception.DecoratedBufferOverflowException;
 import org.zarp.core.annotations.NonNegative;
 import org.zarp.core.api.Jvm;
 import org.zarp.core.internal.UnsafeMemory;
@@ -151,18 +152,18 @@ public interface RandomAccess extends RefInstance {
      *
      * @param offset logical position within this buffer relative to {@link #start()}
      * @return underlying address for reading
-     * @throws IndexOutOfBoundsException if offset is out of bounds of this buffer
+     * @throws DecoratedBufferOverflowException if offset is out of bounds of this buffer
      */
-    long addressForRead(long offset) throws IndexOutOfBoundsException;
+    long addressForRead(long offset) throws DecoratedBufferOverflowException;
 
     /**
      * Retrieves the underlying memory address for writing.
      *
      * @param offset logical position within this buffer relative to {@link #start()}
      * @return underlying address for writing
-     * @throws IndexOutOfBoundsException if offset is out of bounds of this buffer
+     * @throws DecoratedBufferOverflowException if offset is out of bounds of this buffer
      */
-    long addressForWrite(long offset) throws IndexOutOfBoundsException;
+    long addressForWrite(long offset) throws DecoratedBufferOverflowException;
 
     /**
      * Tests if this input can be read directly from native memory.

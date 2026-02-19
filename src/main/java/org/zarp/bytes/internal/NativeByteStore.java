@@ -3,6 +3,7 @@ package org.zarp.bytes.internal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zarp.bytes.ZByteStore;
+import org.zarp.bytes.exception.DecoratedBufferOverflowException;
 import org.zarp.core.api.Jvm;
 import org.zarp.core.api.ZPlatform;
 import org.zarp.core.cleaner.BufferFreeServiceLocator;
@@ -89,7 +90,7 @@ public class NativeByteStore<U> extends AbstractByteStore<U> implements ZByteSto
     }
 
     public static NativeByteStore<Void> wrap(byte[] buffer) {
-        NativeByteStore<Void>  store = fixedCapacity(buffer.length);
+        NativeByteStore<Void> store = fixedCapacity(buffer.length);
         store.write(0, buffer);
         return store;
     }
@@ -140,7 +141,7 @@ public class NativeByteStore<U> extends AbstractByteStore<U> implements ZByteSto
         }
         long alloc = ZPlatform.memory().allocate(capacity);
         if (zeroFill || capacity < MEMORY_MAPPED_SIZE) {
-            ZPlatform.memory().setMemory(alloc, capacity, (byte)0);
+            ZPlatform.memory().setMemory(alloc, capacity, (byte) 0);
             ZPlatform.memory().storeFence();
         }
 
@@ -164,7 +165,8 @@ public class NativeByteStore<U> extends AbstractByteStore<U> implements ZByteSto
         this.address = address;
     }
 
-    protected long translateAddr(long offset) {
+    @Override
+    public long translate(long offset) {
         return this.address + offset;
     }
 
@@ -185,13 +187,13 @@ public class NativeByteStore<U> extends AbstractByteStore<U> implements ZByteSto
 
     @Override
     public void zeroOut(long begin, long end)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         if (end <= begin) {
             return;
         }
         begin = Math.max(begin, start());
         end = Math.min(end, capacity());
-        long addr = translateAddr(begin);
+        long addr = translate(begin);
         long len = end - begin;
         while ((addr & 0x7) != 0 && len > 0) {
             memory().writeByte(addr, (byte) 0);
@@ -211,71 +213,71 @@ public class NativeByteStore<U> extends AbstractByteStore<U> implements ZByteSto
 
     @Override
     public void move(long from, long to, long len)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
-        copyNativeMemory(translateAddr(from), translateAddr(to), len);
+        copyNativeMemory(translate(from), translate(to), len);
     }
 
     @Override
     public byte readByte(long offset)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        return memory().readByte(translateAddr(offset));
+        return memory().readByte(translate(offset));
     }
 
     @Override
     public short readShort(long offset)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        return memory().readShort(translateAddr(offset));
+        return memory().readShort(translate(offset));
     }
 
     @Override
     public int readInt(long offset)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        return memory().readInt(translateAddr(offset));
+        return memory().readInt(translate(offset));
     }
 
     @Override
     public long readLong(long offset)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        return memory().readLong(translateAddr(offset));
+        return memory().readLong(translate(offset));
     }
 
     @Override
     public float readFloat(long offset)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        return memory().readFloat(translateAddr(offset));
+        return memory().readFloat(translate(offset));
     }
 
     @Override
     public double readDouble(long offset)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        return memory().readDouble(translateAddr(offset));
+        return memory().readDouble(translate(offset));
     }
 
     @Override
     public int read(long offset, byte[] dst, int dstBegin, int len)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         Objects.requireNonNull(dst);
         Longs.requireNonNegative(offset);
         Ints.requireNonNegative(dstBegin);
         Ints.requireNonNegative(len);
-        if ((dstBegin + len) > dst.length){
-            throw new IllegalArgumentException(format("%d + %d is out of dst length %d", dstBegin , len, dst.length));
+        if ((dstBegin + len) > dst.length) {
+            throw new IllegalArgumentException(format("%d + %d is out of dst length %d", dstBegin, len, dst.length));
         }
         int left = Math.toIntExact(Math.min(len, readLimit() - offset));
-        memory().readBytes(translateAddr(offset), dst, dstBegin, left);
+        memory().readBytes(translate(offset), dst, dstBegin, left);
         return left;
     }
 
@@ -285,109 +287,109 @@ public class NativeByteStore<U> extends AbstractByteStore<U> implements ZByteSto
         Longs.requireNonNegative(offset);
         Ints.requireNonNegative(dstBegin);
         Ints.requireNonNegative(len);
-        if ((dstBegin + len) > dst.capacity()){
-            throw new IllegalArgumentException(format("%d + %d is out of dst capacity %d", dstBegin , len, dst.capacity()));
+        if ((dstBegin + len) > dst.capacity()) {
+            throw new IllegalArgumentException(format("%d + %d is out of dst capacity %d", dstBegin, len, dst.capacity()));
         }
         int left = Math.toIntExact(Math.min(len, readLimit() - offset));
         if (dst.isDirect()) {
-            memory().copyMemory(translateAddr(offset), DirectBufferUtil.addressOf(dst) + dstBegin, left);
+            memory().copyMemory(translate(offset), DirectBufferUtil.addressOf(dst) + dstBegin, left);
         } else {
-            memory().readBytes(translateAddr(offset), dst.array(), dstBegin, left);
+            memory().readBytes(translate(offset), dst.array(), dstBegin, left);
         }
         return left;
     }
 
     @Override
     public byte readByteVolatile(long offset)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        return memory().readVolatileByte(translateAddr(offset));
+        return memory().readVolatileByte(translate(offset));
     }
 
     @Override
     public short readShortVolatile(long offset)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        return memory().readVolatileShort(translateAddr(offset));
+        return memory().readVolatileShort(translate(offset));
     }
 
     @Override
     public int readIntVolatile(long offset)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        return memory().readVolatileInt(translateAddr(offset));
+        return memory().readVolatileInt(translate(offset));
     }
 
     @Override
     public long readLongVolatile(long offset)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        return memory().readVolatileLong(translateAddr(offset));
+        return memory().readVolatileLong(translate(offset));
     }
 
     @Override
     public void nativeRead(long offset, long address, long len)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        copyNativeMemory(translateAddr(offset), address, len);
+        copyNativeMemory(translate(offset), address, len);
     }
 
     @Override
     public void writeByte(long offset, byte i8)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        memory().writeByte(translateAddr(offset), i8);
+        memory().writeByte(translate(offset), i8);
     }
 
     @Override
     public void writeShort(long offset, short i16)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        memory().writeShort(translateAddr(offset), i16);
+        memory().writeShort(translate(offset), i16);
     }
 
     @Override
     public void writeInt(long offset, int i32)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        memory().writeInt(translateAddr(offset), i32);
+        memory().writeInt(translate(offset), i32);
     }
 
     @Override
     public void writeLong(long offset, long i64)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        memory().writeLong(translateAddr(offset), i64);
+        memory().writeLong(translate(offset), i64);
     }
 
     @Override
     public void writeFloat(long offset, float f32)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        memory().writeFloat(translateAddr(offset), f32);
+        memory().writeFloat(translate(offset), f32);
     }
 
     @Override
     public void writeDouble(long offset, double f64)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        memory().writeDouble(translateAddr(offset), f64);
+        memory().writeDouble(translate(offset), f64);
     }
 
     @Override
     public void write(long offset, byte[] src, int srcBegin, int len)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         Objects.requireNonNull(src);
         Longs.requireNonNegative(offset);
         Ints.requireNonNegative(srcBegin);
@@ -395,12 +397,12 @@ public class NativeByteStore<U> extends AbstractByteStore<U> implements ZByteSto
         if ((srcBegin + len) > src.length) {
             throw new IllegalArgumentException(format("%d + %d out of src length %d", srcBegin, len, src.length));
         }
-        memory().copyMemory(src, srcBegin, translateAddr(offset), len);
+        memory().copyMemory(src, srcBegin, translate(offset), len);
     }
 
     @Override
     public void write(long offset, ByteBuffer src, int srcBegin, int len)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         Objects.requireNonNull(src);
         Longs.requireNonNegative(offset);
         Ints.requireNonNegative(srcBegin);
@@ -409,93 +411,93 @@ public class NativeByteStore<U> extends AbstractByteStore<U> implements ZByteSto
             throw new IllegalArgumentException(format("%d + %d out of src capacity %d", srcBegin, len, src.capacity()));
         }
         if (src.isDirect()) {
-            memory().copyMemory(DirectBufferUtil.addressOf(src) + srcBegin, translateAddr(offset), len);
+            memory().copyMemory(DirectBufferUtil.addressOf(src) + srcBegin, translate(offset), len);
         } else {
-            memory().copyMemory(src.array(), src.arrayOffset() + srcBegin, translateAddr(offset), len);
+            memory().copyMemory(src.array(), src.arrayOffset() + srcBegin, translate(offset), len);
         }
     }
 
     @Override
     public void writeIntOrdered(long offset, int i32)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        memory().writeOrderedInt(translateAddr(offset), i32);
+        memory().writeOrderedInt(translate(offset), i32);
     }
 
     @Override
     public void writeLongOrdered(long offset, long i64)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        memory().writeOrderedLong(translateAddr(offset), i64);
+        memory().writeOrderedLong(translate(offset), i64);
     }
 
     @Override
     public void writeIntVolatile(long offset, int i32)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        memory().writeVolatileInt(translateAddr(offset), i32);
+        memory().writeVolatileInt(translate(offset), i32);
     }
 
     @Override
     public void writeLongVolatile(long offset, long i64)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        memory().writeVolatileLong(translateAddr(offset), i64);
+        memory().writeVolatileLong(translate(offset), i64);
     }
 
     @Override
     public boolean compareAndSwap(long offset, int expected, int value)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        return memory().compareAndSwapInt(translateAddr(offset), expected, value);
+        return memory().compareAndSwapInt(translate(offset), expected, value);
     }
 
     @Override
     public boolean compareAndSwap(long offset, long expected, long value)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        return memory().compareAndSwapLong(translateAddr(offset), expected, value);
+        return memory().compareAndSwapLong(translate(offset), expected, value);
     }
 
     @Override
     public void testAndSet(long offset, int expected, int value)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureOffsetInBound(offset);
-        memory().testAndSetInt(translateAddr(offset), expected, value);
+        memory().testAndSetInt(translate(offset), expected, value);
     }
 
     @Override
     public void testAndSet(long offset, long expected, long value)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         ensureNotReleased();
         ensureOffsetInBound(offset);
-        memory().testAndSetLong(translateAddr(offset), expected, value);
+        memory().testAndSetLong(translate(offset), expected, value);
     }
 
     @Override
     public void nativeWrite(long address, long offset, long len)
-            throws IllegalStateException, IndexOutOfBoundsException {
-        copyNativeMemory(address, translateAddr(offset), len);
+            throws IllegalStateException {
+        copyNativeMemory(address, translate(offset), len);
     }
 
     @Override
     public long addressForRead(long offset)
-            throws IndexOutOfBoundsException {
+            throws DecoratedBufferOverflowException {
         ensureOffsetInBound(offset);
-        return translateAddr(offset);
+        return translate(offset);
     }
 
     @Override
     public long addressForWrite(long offset)
-            throws IndexOutOfBoundsException {
+            throws DecoratedBufferOverflowException {
         ensureOffsetInBound(offset);
-        return translateAddr(offset);
+        return translate(offset);
     }
 
     @Override
@@ -542,7 +544,7 @@ public class NativeByteStore<U> extends AbstractByteStore<U> implements ZByteSto
 
     private void ensureOffsetInBound(long offset) {
         if (offset < start() || offset > size()) {
-            throw new IndexOutOfBoundsException(format("offset (%d) is out of bound [%d,%d)", offset, start(), size()));
+            throw new DecoratedBufferOverflowException(format("offset (%d) is out of bound [%d,%d)", offset, start(), size()));
         }
     }
 

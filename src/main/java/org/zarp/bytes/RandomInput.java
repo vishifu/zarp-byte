@@ -1,12 +1,10 @@
 package org.zarp.bytes;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.zarp.bytes.exception.DecoratedBufferOverflowException;
 import org.zarp.bytes.utils.ByteCommon;
 import org.zarp.core.annotations.NonNegative;
 
 import java.nio.ByteBuffer;
-import java.util.Objects;
 
 /**
  * Represents an input that provides methods for reading data from various types.
@@ -16,7 +14,7 @@ import java.util.Objects;
  * Supports reading of primitive data type like {@code boolean, byte, int, long, etc}.
  * This also have capability of direct reading memory or reading after loading memory barrier.
  * <p>
- * Methods of this can throw exception to {@link IndexOutOfBoundsException} for invalid offset or
+ * Methods of this can throw exception to {@link DecoratedBufferOverflowException} for invalid offset or
  * {@link IllegalStateException} for accessing closed resource.
  * <p>
  * Note: implementation of this usually not care about thread-safe, if multiple threads interact
@@ -31,7 +29,7 @@ public interface RandomInput extends RandomAccess {
      * @return byte value
      */
     byte readByte(@NonNegative long offset)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Reads an unsigned byte value (8-bit) from given offset of this input.
@@ -40,7 +38,7 @@ public interface RandomInput extends RandomAccess {
      * @return int value (represents for unsigned 8-bit value)
      */
     default int readUByte(@NonNegative long offset)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         return readByte(offset) & 0xff;
     }
 
@@ -51,7 +49,7 @@ public interface RandomInput extends RandomAccess {
      * @return boolean value
      */
     default boolean readBool(@NonNegative long offset)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         return ByteCommon.byteToBool(readByte(offset));
     }
 
@@ -62,7 +60,7 @@ public interface RandomInput extends RandomAccess {
      * @return short value
      */
     short readShort(@NonNegative long offset)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Reads an unsigned short value (16-bit) from given offset of this input.
@@ -71,7 +69,7 @@ public interface RandomInput extends RandomAccess {
      * @return int value (represents for unsigned 16-bit value)
      */
     default int readUShort(@NonNegative long offset)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         return readShort(offset) & 0xffff;
     }
 
@@ -104,7 +102,7 @@ public interface RandomInput extends RandomAccess {
      * @return int value
      */
     int readInt(@NonNegative long offset)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Reads an unsigned int value (32-bit) from given offset of this input.
@@ -113,7 +111,7 @@ public interface RandomInput extends RandomAccess {
      * @return long value (represents for unsigned 32-bit value)
      */
     default long readUInt(@NonNegative long offset)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         return readInt(offset) & 0xffffffffL;
     }
 
@@ -124,7 +122,7 @@ public interface RandomInput extends RandomAccess {
      * @return long value
      */
     long readLong(@NonNegative long offset)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Reads a floating value (32-bit) from given offset of this input.
@@ -133,7 +131,7 @@ public interface RandomInput extends RandomAccess {
      * @return 32-bit floating value
      */
     float readFloat(@NonNegative long offset)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Reads a double value (64-bit) from given offset of this input.
@@ -142,7 +140,7 @@ public interface RandomInput extends RandomAccess {
      * @return 64-bit floating value
      */
     double readDouble(@NonNegative long offset)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Reads a long at given offset, if where are less than 8 bytes then it is possible to read
@@ -152,7 +150,7 @@ public interface RandomInput extends RandomAccess {
      * @return long value, maybe pads with zeros
      */
     default long readLongIncomplete(@NonNegative long offset)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         int left = (int) (readLimit() - offset);
         long v = 0;
         if (left >= 8) {
@@ -174,7 +172,7 @@ public interface RandomInput extends RandomAccess {
      * @return volatile byte value
      */
     byte readByteVolatile(@NonNegative long offset)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Reads a volatile short value (16-bit) from given offset of this input.
@@ -183,7 +181,7 @@ public interface RandomInput extends RandomAccess {
      * @return volatile short value
      */
     short readShortVolatile(@NonNegative long offset)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Reads a volatile int value (32-bit) from given offset of this input.
@@ -192,7 +190,7 @@ public interface RandomInput extends RandomAccess {
      * @return volatile integer value
      */
     int readIntVolatile(@NonNegative long offset)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Reads a volatile long value (64-bit) from given offset of this input.
@@ -201,7 +199,7 @@ public interface RandomInput extends RandomAccess {
      * @return volatile long value
      */
     long readLongVolatile(@NonNegative long offset)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Reads a volatile float value (32-bit) from given offset of this input.
@@ -210,7 +208,7 @@ public interface RandomInput extends RandomAccess {
      * @return volatile 32-bit floating value
      */
     default float readFloatVolatile(@NonNegative long offset)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         return Float.intBitsToFloat(readIntVolatile(offset));
     }
 
@@ -221,7 +219,7 @@ public interface RandomInput extends RandomAccess {
      * @return volatile 64-bit floating value
      */
     default double readDoubleVolatile(@NonNegative long offset)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         return Double.longBitsToDouble(readLongVolatile(offset));
     }
 
@@ -234,7 +232,7 @@ public interface RandomInput extends RandomAccess {
      * @return actual number of bytes that was read
      */
     default int read(@NonNegative long offset, byte[] dst)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         return read(offset, dst, 0, dst.length);
     }
 
@@ -248,7 +246,7 @@ public interface RandomInput extends RandomAccess {
      * @return actual number of bytes that was read
      */
     default int read(@NonNegative long offset, byte[] dst, int dstBegin)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         return read(offset, dst, dstBegin, (dst.length - dstBegin));
     }
 
@@ -263,7 +261,7 @@ public interface RandomInput extends RandomAccess {
      * @return actual number of bytes that was read
      */
     int read(@NonNegative long offset, byte[] dst, int dstBegin, int len)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Reads this input into another ByteBuffer, the data is read from {@code offset}.
@@ -274,7 +272,7 @@ public interface RandomInput extends RandomAccess {
      * @return actual number of bytes that was can be read
      */
     default int read(@NonNegative long offset, ByteBuffer dst)
-            throws IllegalStateException, IndexOutOfBoundsException {
+            throws IllegalStateException, DecoratedBufferOverflowException {
         return read(offset, dst, dst.position(), dst.remaining());
     }
 
@@ -288,7 +286,7 @@ public interface RandomInput extends RandomAccess {
      * @return actual number of bytes that was can be read
      */
     int read(@NonNegative long offset, ByteBuffer dst, int dstBegin, int len)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, DecoratedBufferOverflowException;
 
     /**
      * Reads data into native memory from this input at given offset
@@ -298,7 +296,7 @@ public interface RandomInput extends RandomAccess {
      * @param len     number of bytes to read
      */
     void nativeRead(@NonNegative long offset, long address, long len)
-            throws IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException;
 
     /**
      * Finds the first occurrence position of the give byte value in this input, starting to find from {@code offset}
