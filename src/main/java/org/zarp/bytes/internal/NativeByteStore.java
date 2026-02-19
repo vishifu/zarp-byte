@@ -46,9 +46,6 @@ public class NativeByteStore<U> extends AbstractByteStore<U> implements ZByteSto
     /* actual allocated capacity of this store */
     private long size;
 
-    /* whether this store is elastic or not */
-    private boolean elastic;
-
     /* backing underlying object, typically a ByteBuffer */
     private U underlyingObject;
 
@@ -67,7 +64,6 @@ public class NativeByteStore<U> extends AbstractByteStore<U> implements ZByteSto
     protected NativeByteStore(long address, long size, SimpleCleaner deallocator, boolean elastic, boolean monitored) {
         super(monitored);
         setAddress(address);
-        this.elastic = elastic;
         this.size = size;
         this.capacity = elastic ? DEFAULT_MAX_CAPACITY : size;
         this.cleaner = deallocator == null ? NO_DEALLOCATOR : deallocator;
@@ -85,7 +81,7 @@ public class NativeByteStore<U> extends AbstractByteStore<U> implements ZByteSto
 
     protected NativeByteStore(ByteBuffer buffer, boolean elastic, long capacity) {
         this();
-        initiate(buffer, elastic);
+        initiate(buffer);
         this.capacity = elastic ? capacity : Math.min(buffer.capacity(), capacity);
     }
 
@@ -103,9 +99,21 @@ public class NativeByteStore<U> extends AbstractByteStore<U> implements ZByteSto
         return new NativeByteStore<>(buffer, elastic);
     }
 
+    public static NativeByteStore<ByteBuffer> elasticBuffer(int size) {
+        return elasticBuffer(size, DEFAULT_MAX_CAPACITY);
+    }
+
+    public static NativeByteStore<ByteBuffer> elasticBuffer(int size, long capacity) {
+        if (capacity > DEFAULT_MAX_CAPACITY) {
+            log.warn("capacity over default value, capped to {}", DEFAULT_MAX_CAPACITY);
+            capacity = DEFAULT_MAX_CAPACITY;
+        }
+        return new NativeByteStore<>(ByteBuffer.allocateDirect(size), true, capacity);
+    }
+
     public static NativeByteStore<ByteBuffer> follow(ByteBuffer buffer) {
         NativeByteStore<ByteBuffer> store = new NativeByteStore<>();
-        store.initiate(buffer, false);
+        store.initiate(buffer);
         store.capacity = store.size;
         store.cleaner = NO_DEALLOCATOR;
         return store;
@@ -150,9 +158,8 @@ public class NativeByteStore<U> extends AbstractByteStore<U> implements ZByteSto
     }
 
     @SuppressWarnings("unchecked")
-    private void initiate(ByteBuffer buffer, boolean elastic) {
+    private void initiate(ByteBuffer buffer) {
         buffer.order(ByteOrder.nativeOrder());
-        this.elastic = elastic;
         this.underlyingObject = (U) buffer;
         this.size = buffer.capacity();
         setAddress(DirectBufferUtil.addressOf(buffer));

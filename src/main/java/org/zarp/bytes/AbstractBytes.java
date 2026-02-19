@@ -27,7 +27,7 @@ public abstract class AbstractBytes<U>
 
     private static final AtomicLong G_ID = new AtomicLong(1);
     private static final boolean BOUND_UNCHECKED = Jvm.getBoolean("zbytes.bounds_check.disable", false);
-    private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    protected static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final UncheckedRandomInputHolder UNCHECKED_RANDOM_IN = new UncheckedRandomInputHolder();
 

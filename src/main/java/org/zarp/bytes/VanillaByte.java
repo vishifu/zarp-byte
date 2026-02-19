@@ -1,5 +1,11 @@
 package org.zarp.bytes;
 
+/**
+ * A base implementation, inherits {@link AbstractBytes} with a fixed-capacity backing byte-store.
+ * This class itself is not elastic.
+ *
+ * @param <U> underlying memory type
+ */
 public class VanillaByte<U> extends AbstractBytes<U> {
 
     protected VanillaByte(ZByteStore<U> zstore) {

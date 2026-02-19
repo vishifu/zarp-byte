@@ -4,10 +4,12 @@ import org.zarp.bytes.algo.OptimisedByteStoreHash;
 import org.zarp.bytes.algo.VanillaByteStoreHash;
 import org.zarp.bytes.exception.DecoratedBufferOverflowException;
 import org.zarp.bytes.internal.NativeByteStore;
+import org.zarp.bytes.internal.OnHeapByteStore;
 import org.zarp.core.annotations.NonNegative;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.Objects;
 
 /**
@@ -17,6 +19,26 @@ import java.util.Objects;
  * @param <U> underlying data type
  */
 public interface ZByteStore<U> extends RandomInput, RandomOutput, AddressTranslate {
+
+    static ZByteStore<ByteBuffer> elasticBuffer(int size) {
+        return NativeByteStore.elasticBuffer(size);
+    }
+
+    static ZByteStore<ByteBuffer> elasticBuffer(int size, long capacity) {
+        return NativeByteStore.elasticBuffer(size, capacity);
+    }
+
+    static ZByteStore<Void> lazyFixedCapacity(long requested) {
+        return NativeByteStore.lazyFixedCapacity(requested);
+    }
+
+    static ZByteStore<byte[]> wraps(byte[] array) {
+        return OnHeapByteStore.wrap(array);
+    }
+
+    static ZByteStore<ByteBuffer> wraps(ByteBuffer buffer) {
+        return OnHeapByteStore.wrap(buffer);
+    }
 
     /**
      * @return the backed object for this data structure, or null if not present
@@ -83,27 +105,33 @@ public interface ZByteStore<U> extends RandomInput, RandomOutput, AddressTransla
     }
 
     /**
-     * Attempts to transfer amount of readable byte into another store, the amount is the available space
+     * Attempts to transfer amount of readable byte into another dst, the amount is the available space
      * of readable bytes of source and writable bytes of destination.
      *
-     * @param store destination store
+     * @param dst destination dst
      * @return actual number of bytes were transferred
      */
-    default long copyTo(ZByteStore<?> store) throws IllegalStateException, DecoratedBufferOverflowException {
-        Objects.requireNonNull(store, "destination store is null");
+    default long copyTo(ZByteStore<?> dst) throws IllegalStateException {
+        Objects.requireNonNull(dst, "destination dst is null");
         ensureNotReleased();
-        store.ensureNotReleased();
+        dst.ensureNotReleased();
 
         long rpos = readPosition();
-        long wpos = store.writePosition();
-        long left = Math.min(readRemaining(), store.writeRemaining());
-        long i = 0;
-
-        for (; i < left - 7; i += 8) {
-            store.writeLong(wpos + i, readLong(rpos + i));
+        long wpos = dst.writePosition();
+        long left = Math.min(readRemaining(), dst.writeRemaining());
+        if (left <= 0) {
+            return -1;
         }
-        for (; i < left; i++) {
-            store.writeByte(wpos + i, readByte(rpos + i));
+        long i = 0;
+        try {
+            for (; i < left - 7; i += 8) {
+                dst.writeLong(wpos + i, readLong(rpos + i));
+            }
+            for (; i < left; i++) {
+                dst.writeByte(wpos + i, readByte(rpos + i));
+            }
+        } catch (DecoratedBufferOverflowException ex) {
+            throw new IllegalStateException(ex);
         }
 
         return left;
@@ -138,6 +166,7 @@ public interface ZByteStore<U> extends RandomInput, RandomOutput, AddressTransla
 
     /**
      * Gets byte at current position without modifying read position.
+     *
      * @return current byte value
      */
     default byte peekByte() throws IllegalStateException, DecoratedBufferOverflowException {
@@ -146,6 +175,7 @@ public interface ZByteStore<U> extends RandomInput, RandomOutput, AddressTransla
 
     /**
      * Gets unsigned byte at current position without modifying read position.
+     *
      * @return current unsigned byte value
      */
     default int peekUByte() throws IllegalStateException, DecoratedBufferOverflowException {
