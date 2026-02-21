@@ -1,6 +1,9 @@
 package org.zarp.bytes;
 
 import org.zarp.bytes.exception.DecoratedBufferOverflowException;
+import org.zarp.bytes.internal.OnHeapByteStore;
+
+import java.nio.ByteBuffer;
 
 import static org.zarp.core.utils.ZFmt.bytesToKiB;
 
@@ -19,6 +22,26 @@ public class OnHeapByte extends VanillaByte<byte[]> {
 
         writePosition(0L);
         writeLimit(capacity());
+    }
+
+    public static OnHeapByte wraps(ByteBuffer buffer) {
+        return wraps(buffer, false);
+    }
+
+    public static OnHeapByte wraps(ByteBuffer buffer, boolean elastic) {
+        if (buffer.isDirect()) {
+            throw new IllegalArgumentException("buffer is direct");
+        }
+        return wraps(buffer.array(), elastic);
+    }
+
+    public static OnHeapByte wraps(byte[] array) {
+        return wraps(array, false);
+    }
+
+    public static OnHeapByte wraps(byte[] array, boolean elastic) {
+        OnHeapByteStore<byte[]> store = OnHeapByteStore.wrap(array);
+        return new OnHeapByte(store, elastic);
     }
 
     @Override

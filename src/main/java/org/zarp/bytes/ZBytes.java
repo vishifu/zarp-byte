@@ -1,21 +1,53 @@
 package org.zarp.bytes;
 
 import org.zarp.bytes.exception.DecoratedBufferOverflowException;
+import org.zarp.core.conditions.Ints;
+import org.zarp.core.conditions.Longs;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.Objects;
 
 /**
  * Presents a buffer for raw data with separate 63-bit read/write pointer.
- * This class might wrap a {@link ZByteStore} which reside on heap memory or native memory, all intances will be
- * elastic and  reference counted.
+ * This class might wrap a {@link ZByteStore} which reside on heap memory or native memory,
+ * all instances will be elastic and  reference counted.
  * <p>
  * This is not thread-safe.
  *
  * @param <U> underlying type
  */
 public interface ZBytes<U> extends ZByteStore<U>, ByteIn, ByteOut {
+
+    int DEFAULT_BYTE_BUFFER_SIZE = 256;
+
+    static ZBytes<byte[]> wraps(byte[] array, boolean elastic) {
+        return OnHeapByte.wraps(array, elastic);
+    }
+
+    static ZBytes<byte[]> wraps(byte[] array) {
+        return OnHeapByte.wraps(array);
+    }
+
+    static ZBytes<ByteBuffer> elasticBuffer() {
+        return elasticBuffer(DEFAULT_BYTE_BUFFER_SIZE);
+    }
+
+    static ZBytes<ByteBuffer> elasticBuffer(int initSize) {
+        return elasticBuffer(initSize, DEFAULT_MAX_CAPACITY);
+    }
+
+    static ZBytes<ByteBuffer> elasticBuffer(int initSize, long capacity) {
+        Ints.requireNonNegative(initSize);
+        Longs.requireNonNegative(capacity);
+        try {
+            ZByteStore<ByteBuffer> store = ZByteStore.elasticBuffer(initSize, capacity);
+            return new NativeByte<>(store, capacity);
+        } catch (Exception ex) {
+            throw new AssertionError(ex);
+        }
+    }
 
     /**
      * @return true if this is elastic, false otherwise

@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.zarp.bytes.HasUncheckedRandomInput;
 import org.zarp.bytes.UncheckedRandomInput;
 import org.zarp.bytes.ZByteStore;
+import org.zarp.bytes.exception.DecoratedBufferOverflowException;
 import org.zarp.bytes.internal.OnHeapByteStore;
 import org.zarp.core.api.Jvm;
 

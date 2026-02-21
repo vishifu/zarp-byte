@@ -133,6 +133,16 @@ public abstract class AbstractBytes<U>
     }
 
     @Override
+    public long readLimit() {
+        return size();
+    }
+
+    @Override
+    public long readRemaining() {
+        return readLimit() - readPosition();
+    }
+
+    @Override
     public long size() {
         return this.zstore.size();
     }
